@@ -1,0 +1,24 @@
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: get_date
+        name: Get date
+        run: |
+          current_date=$(date -u "+%Y%m%d%H%M%S")
+          echo "current_date=$current_date" >> $GITHUB_OUTPUT
+
+      - name: Create git branch
+        run: |
+          echo ${{steps.get_date.outputs.current_date}} > auto-generated-${{steps.get_date.outputs.current_date}}.txt
+          git config user.name  "GitHub Action"
+          git config user.email "action@github.com"
+          git config --add push.default current
+          git config --add push.autoSetupRemote true
+
+          git checkout -b our-github-actions/${{steps.get_date.outputs.current_date}}
+          git add .
+          git commit -m "auto commit at ${{steps.get_date.outputs.current_date}}"
+          git push
